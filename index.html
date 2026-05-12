@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Music Gallery</title>
+
+<style>
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Inter',sans-serif;
+}
+
+body{
+    min-height:100vh;
+    background:
+    radial-gradient(circle at top,#2e1065,#080617 70%);
+    overflow-x:hidden;
+    color:white;
+}
+
+/* LOADING */
+
+.loader{
+    position:fixed;
+    inset:0;
+    background:#080617;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    z-index:9999;
+    animation:hideLoader 3s forwards;
+}
+
+.loader h1{
+    font-size:70px;
+    letter-spacing:6px;
+    text-shadow:
+    0 0 20px #8b5cf6,
+    0 0 50px #6d28ff;
+    animation:pulse 1.5s infinite;
+}
+
+.loader p{
+    margin-top:15px;
+    color:#c4b5fd;
+}
+
+@keyframes pulse{
+
+    0%{
+        transform:scale(1);
+    }
+
+    50%{
+        transform:scale(1.08);
+    }
+
+    100%{
+        transform:scale(1);
+    }
+
+}
+
+@keyframes hideLoader{
+
+    0%,90%{
+        opacity:1;
+        visibility:visible;
+    }
+
+    100%{
+        opacity:0;
+        visibility:hidden;
+    }
+
+}
+
+/* OPENING */
+
+.opening{
+    position:fixed;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    text-align:center;
+    padding:20px;
+    opacity:0;
+    animation:showOpening 1s forwards;
+    animation-delay:2.8s;
+}
+
+@keyframes showOpening{
+
+    to{
+        opacity:1;
+    }
+
+}
+
+.opening h2{
+    font-size:65px;
+    margin-bottom:20px;
+    text-shadow:0 0 25px #8b5cf6;
+}
+
+.opening p{
+    max-width:700px;
+    font-size:20px;
+    line-height:34px;
+    color:#ddd;
+    margin-bottom:35px;
+}
+
+.opening button{
+    padding:17px 45px;
+    border:none;
+    border-radius:18px;
+    background:#6d28ff;
+    color:white;
+    font-size:18px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.4s;
+}
+
+.opening button:hover{
+    transform:scale(1.08);
+}
+
+/* MUSIC SCREEN */
+
+.music-screen{
+    position:fixed;
+    inset:0;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    background:rgba(8,6,23,0.95);
+    backdrop-filter:blur(10px);
+    z-index:999;
+}
+
+.music-box{
+    width:360px;
+    padding:35px;
+    border-radius:30px;
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.1);
+    text-align:center;
+    box-shadow:0 0 40px rgba(109,40,255,0.5);
+}
+
+.music-icon{
+    font-size:75px;
+    margin-bottom:15px;
+}
+
+.music-title{
+    font-size:30px;
+    margin-bottom:8px;
+}
+
+.artist{
+    color:#c4b5fd;
+    display:block;
+    margin-bottom:22px;
+}
+
+.music-box button{
+    padding:15px 35px;
+    border:none;
+    border-radius:16px;
+    background:#6d28ff;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.4s;
+}
+
+.music-box button:hover{
+    transform:scale(1.08);
+}
+
+/* MAIN */
+
+.main{
+    width:100%;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:40px 20px;
+    opacity:0;
+    visibility:hidden;
+    transition:1s;
+}
+
+.main.show{
+    opacity:1;
+    visibility:visible;
+}
+
+/* GALLERY */
+
+.gallery{
+    width:100%;
+    max-width:1600px;
+    display:flex;
+    flex-direction:column;
+    gap:25px;
+}
+
+.top-gallery,
+.bottom-gallery{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:20px;
+}
+
+.middle-gallery{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:20px;
+}
+
+.card{
+    position:relative;
+    overflow:hidden;
+    border-radius:24px;
+    cursor:pointer;
+    transition:0.5s;
+}
+
+.vertical{
+    height:430px;
+}
+
+.horizontal{
+    height:330px;
+}
+
+.card img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    transition:0.6s;
+}
+
+.card::after{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:linear-gradient(
+        to top,
+        rgba(0,0,0,0.8),
+        transparent
+    );
+    opacity:0;
+    transition:0.5s;
+}
+
+.card:hover::after{
+    opacity:1;
+}
+
+.card:hover{
+    transform:scale(1.03);
+}
+
+.card:hover img{
+    transform:scale(1.1);
+}
+
+.overlay{
+    position:absolute;
+    left:0;
+    bottom:-120px;
+    width:100%;
+    padding:25px;
+    z-index:5;
+    transition:0.5s;
+}
+
+.overlay h2{
+    font-size:28px;
+    margin-bottom:8px;
+}
+
+.overlay p{
+    color:#ddd;
+}
+
+.card:hover .overlay{
+    bottom:0;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:1100px){
+
+    .top-gallery,
+    .bottom-gallery{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .middle-gallery{
+        grid-template-columns:1fr;
+    }
+
+}
+
+@media(max-width:700px){
+
+    .top-gallery,
+    .bottom-gallery{
+        grid-template-columns:1fr;
+    }
+
+    .opening h2{
+        font-size:45px;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- MUSIK SENDIRI -->
+
+<!--
+CARA GANTI MUSIK:
+1. Masukkan file musik ke folder project
+2. Contoh nama file: laguku.mp3
+3. Ganti src di bawah jadi nama file kamu
+-->
+
+<audio id="music" loop>
+
+    <source src="https://dn720300.ca.archive.org/0/items/Mengenangmu/Mengenangmu.mp3" type="audio/mp3">
+
+</audio>
+
+<!-- LOADING -->
+
+<div class="loader">
+
+    <h1>“Memories Never Really Leave”</h1>
+
+    <p>“Loading old memories...”</p>
+
+</div>
+
+<!-- OPENING -->
+
+<div class="opening" id="opening">
+
+    <h2>Hello Past Time ✨</h2>
+
+    <p>
+        “Di sini, semua cerita lama masih terasa nyata.”
+    </p>
+
+    <button onclick="showMusic()">
+        “Open Gallery”
+    </button>
+
+</div>
+
+<!-- MUSIC -->
+
+<div class="music-screen" id="musicScreen">
+
+    <div class="music-box">
+
+        <div class="music-icon">
+            🎵
+        </div>
+
+        <!-- GANTI JUDUL MUSIK -->
+
+        <h2 class="music-title">
+          “Mengenangmu 🎵”
+        </h2>
+
+        <!-- GANTI NAMA ARTIS -->
+
+        <span class="artist">
+            kerispatih
+        </span>
+
+        <p style="margin-bottom:25px;">
+            “Karena beberapa kenangan tidak pernah benar-benar pergi.”
+        </p>
+
+        <button onclick="startExperience()">
+            “Play Memories”
+        </button>
+
+    </div>
+
+</div>
+
+<!-- MAIN -->
+
+<div class="main" id="main">
+
+<div class="gallery">
+
+    <!-- ATAS -->
+
+    <div class="top-gallery">
+
+        <div class="card vertical">
+
+            <img src="https://i.pinimg.com/736x/45/30/d2/4530d27bd14bf063c3bad556ffe0b0f5.jpg">
+
+            <div class="overlay">
+                <h2>Foto sunset🌅 </h2>
+                <p>“Senja selalu indah, apalagi kalau ditemenin kamu.”</p>
+            </div>
+
+        </div>
+
+        <div class="card vertical">
+
+            <img src="https://i.pinimg.com/originals/d6/b7/a9/d6b7a95c1a4859fdbeb3bf396610e38c.jpg">
+
+            <div class="overlay">
+                <h2> Foto duduk di hutan🌲</h2>
+                <p>“Sesederhana duduk bareng, rasanya udah cukup.”</p>
+            </div>
+
+        </div>
+
+        <div class="card vertical">
+
+            <img src="https://i.pinimg.com/originals/0a/ab/65/0aab65a21bf020d35ac361f8e76e1ef2.jpg">
+
+            <div class="overlay">
+                <h2> Foto malam🌌</h2>
+                <p>“Di tempat gelap pun, kamu tetap jadi tenangku.”</p>
+            </div>
+
+        </div>
+
+        <div class="card vertical">
+
+            <img src="https://i.pinimg.com/736x/64/2d/86/642d86e25fab0685cef6367ac8714d56.jpg">
+            <div class="overlay">
+                <h2>Foto jalan bawah pohon🌸</h2>
+                <p>“Semoga langkah kita tetap searah.”</p>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- TENGAH -->
+
+    <div class="middle-gallery">
+
+        <div class="card horizontal">
+
+            <img src="https://i.pinimg.com/736x/f2/7e/2c/f27e2c4936163fac1c3a39eec4193c50.jpg">
+            <div class="overlay">
+                <h2>Foto pelukan di atas awan☁️ </h2>
+                <p>“Kalau sama kamu, dunia terasa kecil.”</p>
+            </div>
+
+        </div>
+
+        <div class="card horizontal">
+
+            <img src="https://i.pinimg.com/1200x/0c/fc/b5/0cfcb5542707b2b96a43d9a51e82cf9f.jpg">
+
+            <div class="overlay">
+                <h2>Foto heart di tangan❤️</h2>
+                <p>“Bukan cuma gambar hati, tapi isi hatiku juga.”</p>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- BAWAH -->
+
+    <div class="bottom-gallery">
+
+        <div class="card vertical">
+
+            <img src="https://i.pinimg.com/236x/8b/67/b7/8b67b742a5eaa90ad3176241cd01bb2e.jpg">
+
+            <div class="overlay">
+                <h2> Foto pegangan tangan🤝</h2>
+                <p>“Aku suka cara kita saling genggam.”</p>
+            </div>
+
+        </div>
+
+        <div class="card vertical">
+
+            <img src="https://i.pinimg.com/736x/57/86/13/578613b2f9c9d80ee5e63a029ae87f72.jpg">
+
+            <div class="overlay">
+                <h2> Foto bioskop🎥</h2>
+                <p>“Filmnya lupa, momennya engga.”</p>
+            </div>
+
+        </div>
+
+        <div class="card vertical">
+
+            <img src="https://i.pinimg.com/736x/82/a9/24/82a924943d98cff204b82dc2cee9e469.jpg">
+
+            <div class="overlay">
+                <h2>Foto bayangan love🌑 </h2>
+                <p>“Walau cuma bayangan, rasanya tetap nyata.”</p>
+            </div>
+
+        </div>
+
+        <div class="card vertical">
+
+            <img src="https://i.pinimg.com/736x/7f/ee/0b/7fee0bfd40336ca73b961838119f4a95.jpg">
+
+            <div class="overlay">
+                <h2>Foto mirror/HP📱 </h2>
+                <p>“Semua foto punya cerita, dan kamu favoritnya.”</p>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</div>
+
+<script>
+
+function showMusic(){
+
+    document.getElementById("opening").style.display = "none";
+
+    document.getElementById("musicScreen").style.display = "flex";
+
+}
+
+function startExperience(){
+
+    const music = document.getElementById("music");
+
+    music.volume = 1;
+
+    music.play();
+
+    document.getElementById("musicScreen").style.display = "none";
+
+    document.getElementById("main").classList.add("show");
+
+}
+
+</script>
+
+</body>
+</html>
